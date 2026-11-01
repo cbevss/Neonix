@@ -1,0 +1,36 @@
+name: Stage installer
+
+# Copies the installer from a finished build onto a temporary branch so it can be fetched with git.
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Build run to take the installer from'
+        required: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Neonix-installer
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: staged
+
+      - name: Push to installer-staging branch
+        run: |
+          cd staged
+          ls -la
+          git init -q -b installer-staging
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -q -m "Staged installer from run ${{ inputs.run_id }}"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push -f origin installer-staging
