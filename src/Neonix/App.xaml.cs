@@ -10,6 +10,8 @@ namespace Neonix
         public static HardwareService Hardware { get; private set; } = null!;
         public static RgbService Rgb { get; private set; } = null!;
         public static EffectEngine Effects { get; private set; } = null!;
+        ScreenService _screen = null!;
+        AudioService _audio = null!;
         FanCurveService _fans = null!;
         ProfileWatcher _watcher = null!;
         MainWindow _window = null!;
@@ -27,9 +29,12 @@ namespace Neonix
             };
 
             SettingsStore.Load();
+            AccountService.Load();
             Hardware = new HardwareService();
             Rgb = new RgbService();
-            Effects = new EffectEngine(Rgb, Hardware);
+            _screen = new ScreenService();
+            _audio = new AudioService();
+            Effects = new EffectEngine(Rgb, Hardware, _screen, _audio);
             _fans = new FanCurveService(Hardware);
             _watcher = new ProfileWatcher();
 
@@ -55,7 +60,7 @@ namespace Neonix
             menu.Opening += (_, _) =>
             {
                 profiles.DropDownItems.Clear();
-                foreach (var p in SettingsStore.Current.Profiles)
+                foreach (var p in SettingsStore.VisibleProfiles())
                 {
                     var name = p.Name;
                     var item = new System.Windows.Forms.ToolStripMenuItem(name)
@@ -84,6 +89,8 @@ namespace Neonix
             _watcher.Dispose();
             _fans.Dispose();
             Effects.Dispose();
+            _screen.Dispose();
+            _audio.Dispose();
             Rgb.Dispose();
             Hardware.Dispose();
             Shutdown();

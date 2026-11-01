@@ -345,5 +345,61 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ───────── Small icon buttons (sidebar toggle) ───────── -->
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="34"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="9" Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#2A2455"/>
+                                <Setter Property="Foreground" Value="{StaticResource Text}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#3A3170"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ───────── Password boxes ───────── -->
+        <Style TargetType="PasswordBox">
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource Accent2}"/>
+            <Setter Property="Background" Value="{StaticResource Field}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="bd" CornerRadius="8" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Accent2}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#4A4380"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>

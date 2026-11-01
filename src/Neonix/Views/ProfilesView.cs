@@ -26,6 +26,7 @@ namespace Neonix.Views
                 var copy = JsonSerializer.Deserialize<Profile>(json)!;
                 copy.Name = name;
                 copy.TriggerProcess = null;
+                copy.Owner = SettingsStore.Current.SignedInEmail;
                 SettingsStore.Current.Profiles.Add(copy);
                 SettingsStore.Save();
                 Rebuild();
@@ -43,7 +44,7 @@ namespace Neonix.Views
         void Rebuild()
         {
             _list.Children.Clear();
-            foreach (var p in SettingsStore.Current.Profiles.ToList())
+            foreach (var p in SettingsStore.VisibleProfiles().ToList())
             {
                 var prof = p;
                 bool active = prof.Name == SettingsStore.Current.ActiveProfile;
@@ -56,11 +57,11 @@ namespace Neonix.Views
                 var btns = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
                 if (!active)
                     btns.Children.Add(Ui.Btn("Activate", (_, _) => { SettingsStore.SwitchProfile(prof.Name); Rebuild(); }));
-                if (SettingsStore.Current.Profiles.Count > 1)
+                if (SettingsStore.VisibleProfiles().Count() > 1)
                     btns.Children.Add(Ui.Btn("Delete", (_, _) =>
                     {
                         SettingsStore.Current.Profiles.Remove(prof);
-                        if (active) SettingsStore.SwitchProfile(SettingsStore.Current.Profiles[0].Name);
+                        if (active) SettingsStore.SwitchProfile(SettingsStore.VisibleProfiles().First().Name);
                         SettingsStore.Save();
                         Rebuild();
                     }));

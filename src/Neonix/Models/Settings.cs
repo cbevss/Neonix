@@ -1,9 +1,18 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Neonix.Models
 {
-    public enum EffectType { Static, Breathing, Rainbow, Wave, ColorCycle, Off }
+    // New effects are appended so settings saved by older versions keep their meaning.
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum EffectType
+    {
+        Static, Breathing, Rainbow, Wave, ColorCycle, Off,
+        Fire, Comet, Sparkle,
+        ScreenAmbience, AudioSpectrum, AudioPulse,
+    }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum SyncMode { None, CpuTemperature, GpuTemperature }
 
     public class LightingSettings
@@ -13,6 +22,10 @@ namespace Neonix.Models
         public string Color2 { get; set; } = "#00E1FF";
         public int Speed { get; set; } = 50;       // 0-100
         public int Brightness { get; set; } = 100; // 0-100
+        /// <summary>Audio effects: how strongly the lights react (0-100).</summary>
+        public int Sensitivity { get; set; } = 60;
+        /// <summary>Screen ambience: how much colour changes are smoothed (0-95).</summary>
+        public int Smoothing { get; set; } = 60;
         /// <summary>Device names (as reported) that are excluded from lighting.</summary>
         public List<string> DisabledDevices { get; set; } = new();
     }
@@ -62,6 +75,8 @@ namespace Neonix.Models
         public List<FanCurve> Fans { get; set; } = new();
         /// <summary>Optional process name (e.g. "cs2") that auto-activates this profile.</summary>
         public string? TriggerProcess { get; set; }
+        /// <summary>Email of the account that owns this profile. Null means shared by everyone on this PC.</summary>
+        public string? Owner { get; set; }
     }
 
     public class AppSettings
@@ -69,7 +84,9 @@ namespace Neonix.Models
         public bool StartWithWindows { get; set; }
         public bool MinimizeToTray { get; set; } = true;
         public bool StartOpenRgbAutomatically { get; set; } = true;
+        public bool SidebarHidden { get; set; }
         public string? OpenRgbPath { get; set; }
+        public string? SignedInEmail { get; set; }
         public string ActiveProfile { get; set; } = "Default";
         public List<Profile> Profiles { get; set; } = new() { new Profile() };
         /// <summary>User-given friendly names, keyed by the detected device name.</summary>

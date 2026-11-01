@@ -10,13 +10,16 @@ Open-source RGB lighting and fan control for Windows. One app for your motherboa
 | --- | --- |
 | **Dashboard** | Auto-detected specs, usage, temperatures and fan speeds |
 | **Devices** | RGB devices and USB controllers found automatically, rename them, identify them, light a range of a daisy chain |
-| **Lighting** | Static, Breathing, Rainbow, Wave, Colour cycle; speed, brightness, colours |
+| **Lighting** | Static, Breathing, Rainbow, Wave, Colour cycle, Fire, Comet, Sparkle, plus **Screen ambience** and an **Audio visualiser**; live preview, speed, brightness, colours |
 | **Sync** | Lighting colour follows CPU or GPU temperature |
 | **Fans** | Per-fan curves, Silent / Balanced / Performance / 100% presets |
 | **Profiles** | Save setups, auto-switch when a chosen program (e.g. a game) is running |
+| **Account** | Local email + password accounts that keep each person's profiles separate (stored on this PC only, no cloud sync yet) |
 | **Settings** | Start with Windows, tray behaviour, RGB driver path |
 
-Not yet: screen ambience, audio visualiser, game integrations, native drivers for individual brands (planned).
+The sidebar slides away with the chevron at its top right (or **Ctrl+B**).
+
+Not yet: game integrations, cloud accounts and sync, native drivers for individual brands (planned).
 
 ## Install
 
@@ -41,6 +44,8 @@ dotnet run --project src/Neonix
 - Controllers that connect by USB (Airgoo, Nollie, Corsair Node, NZXT Hue and others) show up as their own devices. Lights wired in a daisy chain from a motherboard header can't be detected. Use **Devices → Daisy-chain setup** to find out which LEDs belong to which part.
 - If antivirus or anti-cheat flags Neonix, it's because fan control uses a kernel driver (via LibreHardwareMonitor). Neonix doesn't need it for RGB only.
 - Closing Neonix hands every fan back to the BIOS.
+- Screen ambience samples your main monitor and the audio visualiser listens to what's *playing* on your PC (not the microphone). Both run only while their effect is selected, entirely on your PC; nothing is recorded or sent anywhere.
+- Accounts are local. Passwords are stored only as a salted PBKDF2 hash, and a forgotten password can't be recovered.
 
 ## Credits and licence
 

@@ -192,6 +192,45 @@ namespace Neonix.Views
             return new Border { Height = height, CornerRadius = new CornerRadius(height / 2), Background = brush, Margin = new Thickness(0, 0, 0, 22) };
         }
 
+
+        /// <summary>A gradient whose angle keeps rotating. Each call returns its own brush.</summary>
+        public static LinearGradientBrush AnimatedGradient(double seconds = 7)
+        {
+            var rot = new RotateTransform(0, 0.5, 0.5);
+            var brush = new LinearGradientBrush
+            {
+                StartPoint = new Point(0, 0.5), EndPoint = new Point(1, 0.5),
+                SpreadMethod = GradientSpreadMethod.Reflect, RelativeTransform = rot,
+            };
+            foreach (var (c, o) in new[] { ("#FF2EAA", 0.0), ("#8C3CFF", 0.4), ("#00E1FF", 0.8), ("#00FF9C", 1.0) })
+                brush.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString(c), o));
+            rot.BeginAnimation(RotateTransform.AngleProperty,
+                new DoubleAnimation(0, 360, TimeSpan.FromSeconds(seconds)) { RepeatBehavior = RepeatBehavior.Forever });
+            return brush;
+        }
+
+        /// <summary>A quick side-to-side shake, e.g. for a wrong password.</summary>
+        public static void Shake(FrameworkElement e)
+        {
+            var tt = e.RenderTransform as TranslateTransform;
+            if (tt == null) { tt = new TranslateTransform(); e.RenderTransform = tt; }
+            var kf = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromMilliseconds(420) };
+            double[] xs = { 0, -10, 9, -7, 5, -3, 0 };
+            for (int i = 0; i < xs.Length; i++)
+                kf.KeyFrames.Add(new LinearDoubleKeyFrame(xs[i], KeyTime.FromPercent((i + 1) / (double)xs.Length)));
+            tt.BeginAnimation(TranslateTransform.XProperty, kf);
+        }
+
+        /// <summary>Fades a text block in with a small upward slide (e.g. an error message).</summary>
+        public static void PopIn(FrameworkElement e)
+        {
+            var tt = new TranslateTransform(0, 6);
+            e.RenderTransform = tt;
+            e.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220)));
+            tt.BeginAnimation(TranslateTransform.YProperty,
+                new DoubleAnimation(6, 0, TimeSpan.FromMilliseconds(260)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } });
+        }
+
         /// <summary>A progress bar that glides to each new value.</summary>
         public sealed class Meter : Grid
         {

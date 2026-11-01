@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -13,6 +14,8 @@ namespace Neonix.Services
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Neonix");
         static readonly string FilePath = Path.Combine(Dir, "settings.json");
         static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
+
+        public static string DataDirectory => Dir;
 
         public static AppSettings Current { get; private set; } = new();
 
@@ -48,6 +51,28 @@ namespace Neonix.Services
                 File.WriteAllText(FilePath, JsonSerializer.Serialize(Current, Options));
             }
             catch { /* best effort */ }
+        }
+
+        /// <summary>Profiles the signed-in account (or everyone, if signed out) may see.</summary>
+        public static IEnumerable<Profile> VisibleProfiles()
+        {
+            var me = Current.SignedInEmail;
+            return Current.Profiles.Where(p => p.Owner == null || p.Owner == me);
+        }
+
+        /// <summary>After signing in or out, make sure the active profile is one the user may use.</summary>
+        public static void EnsureVisibleActive()
+        {
+            var visible = VisibleProfiles().ToList();
+            if (visible.Count == 0)
+            {
+                Current.Profiles.Add(new Profile { Name = "Default" });
+                visible = VisibleProfiles().ToList();
+            }
+            if (visible.All(p => p.Name != Current.ActiveProfile))
+                SwitchProfile(visible[0].Name);
+            else
+                ProfileChanged?.Invoke();
         }
 
         public static void SwitchProfile(string name)
