@@ -36,28 +36,49 @@ jobs:
         continue-on-error: true
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          $releases = Invoke-RestMethod 'https://gitlab.com/api/v4/projects/CalcProgrammer1%2FOpenRGB/releases'
-          $url = $null
-          foreach ($r in $releases) {
-            foreach ($l in $r.assets.links) {
-              if ($l.name -match 'Windows' -and $l.name -match '64' -and ($l.url -match '\.zip$' -or $l.direct_asset_url -match '\.zip$')) {
-                $url = if ($l.direct_asset_url) { $l.direct_asset_url } else { $l.url }
-                Write-Host "Release: $($r.tag_name)  Asset: $($l.name)"
-                break
+          $ErrorActionPreference = 'Continue'
+          $urls = @()
+
+          # 1) Newest experimental pipeline build from the OpenRGB project (needed for recent hardware).
+          $urls += 'https://gitlab.com/CalcProgrammer1/OpenRGB/-/jobs/artifacts/master/download?job=Windows%2064'
+
+          # 2) Latest tagged release assets, if the project lists any.
+          try {
+            $releases = Invoke-RestMethod 'https://gitlab.com/api/v4/projects/CalcProgrammer1%2FOpenRGB/releases'
+            foreach ($r in $releases) {
+              foreach ($l in $r.assets.links) {
+                Write-Host "Release asset: $($r.tag_name) / $($l.name) / $($l.url)"
+                if ($l.url -match 'Windows' -and $l.url -match '64' -and $l.url -match '\.zip') { $urls += $l.url }
               }
             }
-            if ($url) { break }
+          } catch { Write-Host "Release API: $($_.Exception.Message)" }
+
+          # 3) Links on the OpenRGB website.
+          try {
+            $page = Invoke-WebRequest 'https://openrgb.org/releases.html'
+            foreach ($m in [regex]::Matches($page.Content, 'href="([^"]*Windows_64[^"]*\.zip)"')) {
+              $u = $m.Groups[1].Value
+              if ($u -notmatch '^http') { $u = 'https://openrgb.org/' + $u.TrimStart('/') }
+              Write-Host "Website asset: $u"
+              $urls += $u
+            }
+          } catch { Write-Host "Website: $($_.Exception.Message)" }
+
+          foreach ($url in $urls) {
+            Write-Host "Trying $url"
+            try {
+              Remove-Item openrgb.zip, openrgb-tmp -Recurse -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest $url -OutFile openrgb.zip
+              Expand-Archive openrgb.zip -DestinationPath openrgb-tmp -Force
+              $exe = Get-ChildItem openrgb-tmp -Recurse -Filter OpenRGB.exe | Select-Object -First 1
+              if (-not $exe) { Write-Host 'No OpenRGB.exe in that archive.'; continue }
+              New-Item -ItemType Directory -Force openrgb | Out-Null
+              Copy-Item "$($exe.Directory.FullName)\*" openrgb -Recurse -Force
+              Write-Host "Bundled OpenRGB from $url"
+              exit 0
+            } catch { Write-Host "Failed: $($_.Exception.Message)" }
           }
-          if (-not $url) { throw 'No Windows 64-bit OpenRGB zip found in the GitLab releases.' }
-          Write-Host "Downloading $url"
-          Invoke-WebRequest $url -OutFile openrgb.zip
-          Expand-Archive openrgb.zip -DestinationPath openrgb-tmp
-          $exe = Get-ChildItem openrgb-tmp -Recurse -Filter OpenRGB.exe | Select-Object -First 1
-          if (-not $exe) { throw 'OpenRGB.exe not found in the archive.' }
-          New-Item -ItemType Directory -Force openrgb | Out-Null
-          Copy-Item "$($exe.Directory.FullName)\*" openrgb -Recurse -Force
-          Write-Host "Bundled OpenRGB from $($exe.Directory.FullName)"
+          throw 'Could not fetch OpenRGB from any source.'
 
       - name: Work out version
         id: ver
