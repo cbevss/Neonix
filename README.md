@@ -20,12 +20,13 @@ Not yet: screen ambience, audio visualiser, game integrations, native drivers fo
 
 ## Install
 
-1. Download `Neonix-win-x64.zip` from [Releases](../../releases) and unzip it.
-2. Download a recent **experimental** build of [OpenRGB](https://openrgb.org) and put its files in a folder called `OpenRGB` next to `Neonix.exe` (or set the path in Settings).
-3. Close RGB Fusion, SignalRGB, iCUE and similar. Only one app can control a device at a time.
-4. Run `Neonix.exe`. It asks for administrator rights, which are needed to read sensors and set fan speeds.
+1. Download **Neonix-Setup-x.y.z.exe** from [Releases](../../releases) and run it.
+2. Close RGB Fusion, SignalRGB, iCUE and similar. Only one app can control a device at a time.
+3. Start Neonix. It asks for administrator rights, which are needed to read sensors and set fan speeds.
 
-Neonix starts the OpenRGB driver in the background for you. You never need to open OpenRGB itself.
+The installer includes the OpenRGB driver layer where it could be bundled; Neonix starts it in the background for you, so you never need to open OpenRGB yourself. If your hardware is very new, drop a newer experimental OpenRGB build into the `OpenRGB` folder inside the install folder (or set its path in Settings).
+
+A portable zip (`Neonix-portable-win-x64.zip`) is also available.
 
 ## Build from source
 
