@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Animation;
+using System.Windows.Media.Animation;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
