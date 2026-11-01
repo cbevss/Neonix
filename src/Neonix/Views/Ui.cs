@@ -87,7 +87,7 @@ namespace Neonix.Views
                 sp.Children.Add(c);
                 Reveal(c, i++);
             }
-            return new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = sp };
+            return new SmoothScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = sp };
         }
 
         /// <summary>Slide-up + fade-in, staggered by index.</summary>

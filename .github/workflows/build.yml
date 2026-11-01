@@ -96,6 +96,27 @@ jobs:
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=${{ steps.ver.outputs.version }}" installer\Neonix.iss
           Get-ChildItem installer-out
 
+      # Installs the installer on the runner and starts the installed app, to catch
+      # problems that only show up after installing (permissions, missing files, crashes).
+      - name: Smoke test (install and launch)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem installer-out\*.exe | Select-Object -First 1
+          Start-Process $setup.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/LOG=install.log' -Wait
+          $dir = Join-Path $env:ProgramFiles 'Neonix'
+          $exe = Join-Path $dir 'Neonix.exe'
+          Write-Host "Installed exe exists: $(Test-Path $exe)"
+          Get-ChildItem $dir | Format-Table Name, Length
+          Write-Host "OpenRGB folder present: $(Test-Path (Join-Path $dir 'OpenRGB\OpenRGB.exe'))"
+          try {
+            $p = Start-Process $exe -PassThru
+            Start-Sleep -Seconds 12
+            if ($p.HasExited) { Write-Host "SMOKE: app exited early with code $($p.ExitCode)" }
+            else { Write-Host 'SMOKE: app started and kept running'; Stop-Process $p -Force }
+          } catch { Write-Host "SMOKE: could not start app: $($_.Exception.Message)" }
+          Get-Process OpenRGB -ErrorAction SilentlyContinue | Stop-Process -Force
+
       - name: Portable zip
         shell: pwsh
         run: Compress-Archive -Path publish\Neonix.exe -DestinationPath Neonix-portable-win-x64.zip

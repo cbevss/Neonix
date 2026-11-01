@@ -47,7 +47,7 @@ Name: "{autodesktop}\Neonix"; Filename: "{app}\Neonix.exe"; Tasks: desktopicon
 [Run]
 ; Neonix needs admin rights, which Windows ignores in the normal Run key, so "start with Windows" is a logon task.
 Filename: "schtasks.exe"; Parameters: "/Create /F /TN Neonix /SC ONLOGON /RL HIGHEST /TR ""\""{app}\Neonix.exe\"" --minimized"""; Flags: runhidden; Tasks: startup
-Filename: "{app}\Neonix.exe"; Description: "Launch Neonix"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Neonix.exe"; Description: "Launch Neonix"; Flags: nowait postinstall skipifsilent shellexec
 
 [UninstallRun]
 Filename: "schtasks.exe"; Parameters: "/Delete /F /TN Neonix"; Flags: runhidden; RunOnceId: "RemoveNeonixTask"
